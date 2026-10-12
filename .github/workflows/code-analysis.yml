@@ -1,0 +1,64 @@
+name: Salesforce Code Analysis
+
+on:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - 'force-app/**'
+
+jobs:
+  analyze:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'feature/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Salesforce CLI
+        run: npm install -g @salesforce/cli
+
+      - name: Install Salesforce Code Analyzer
+        run: sf plugins install @salesforce/sfdx-scanner
+
+      - name: Run ESLint on LWC
+        run: |
+          sf scanner run \
+            --target "force-app/main/default/lwc" \
+            --engine "eslint" \
+            --format "table" \
+            --severity-threshold 3
+
+      - name: Run PMD on Apex
+        run: |
+          sf scanner run \
+            --target "force-app/main/default/classes" \
+            --engine "pmd" \
+            --format "table" \
+            --severity-threshold 3
+
+      - name: Save scan report
+        if: always()
+        run: |
+          mkdir -p reports
+          sf scanner run \
+            --target "force-app/" \
+            --engine "pmd,eslint" \
+            --format "csv" \
+            --outfile "reports/scan-results.csv" \
+            --severity-threshold 3
+
+      - name: Upload scan report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-analysis-report
+          path: reports/scan-results.csv
+          if-no-files-found: warn
