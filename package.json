@@ -1,10 +1,13 @@
+
 {
   "name": "my-salesforce-project",
   "version": "1.0.0",
   "description": "my-salesforce-project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No tests configured\"",
+    "prepare": "husky",
+    "precommit": "lint-staged"
   },
   "repository": {
     "type": "git",
@@ -17,5 +20,19 @@
   "bugs": {
     "url": "https://github.com/Kashinath99/my-salesforce-project/issues"
   },
-  "homepage": "https://github.com/Kashinath99/my-salesforce-project#readme"
+  "homepage": "https://github.com/Kashinath99/my-salesforce-project#readme",
+  "devDependencies": {
+    "@salesforce/eslint-config-lwc": "^4.1.2",
+    "eslint": "^9.39.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0"
+  },
+  "lint-staged": {
+    "force-app/**/*.js": [
+      "eslint --fix"
+    ],
+    "force-app/**/*.cls": [
+      "scripts\\sf-scan.bat"
+    ]
+  }
 }
